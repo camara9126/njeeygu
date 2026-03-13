@@ -1,5 +1,4 @@
  
-
     // ==================== CONSTANTES ====================
     const TVA_RATE = 0.18; // 18%
     const DEVIS_KEY = 'njeeygu_devis';
