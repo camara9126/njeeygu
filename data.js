@@ -1,4 +1,3 @@
- 
     // ==================== CONSTANTES ====================
     const TVA_RATE = 0.18; // 18%
     const DEVIS_KEY = 'njeeygu_devis';
@@ -36,8 +35,8 @@
     let currentDevisId = null;
     let currentInvoiceId = null;
     let currentStockProductId = null;
-    let currentInvoiceData = null; // Pour la génération de PDF
-    let currentPayslipData = null; // Pour la génération de bulletin PDF
+    let currentInvoiceData = null;
+    let currentPayslipData = null;
     
     // ==================== FONCTIONS TVA ====================
     
@@ -77,7 +76,58 @@
           devis = [];
         }
       } else {
-        
+        // Données de démonstration
+        const demoDevis = [
+          {
+            id: 'DEV-2025-001',
+            date: new Date(2025, 2, 15).toISOString(),
+            customerInfo: {
+              name: 'Fatou Diop',
+              phone: '771234567',
+              email: 'fatou.diop@email.com',
+              quantity: 10,
+              eventDate: new Date(2025, 5, 20).toISOString(),
+              budget: 150000,
+              message: 'Je souhaite organiser un mariage, besoin de décorations'
+            },
+            product: { id: 1, name: 'Nappe Blanche', category: 'table' },
+            status: 'pending',
+            notes: ''
+          },
+          {
+            id: 'DEV-2025-002',
+            date: new Date(2025, 2, 16).toISOString(),
+            customerInfo: {
+              name: 'Amadou Sow',
+              phone: '765432198',
+              email: 'amadou.sow@email.com',
+              quantity: 5,
+              eventDate: new Date(2025, 6, 10).toISOString(),
+              budget: 75000,
+              message: 'Besoin de ballons pour un anniversaire'
+            },
+            product: { id: 3, name: 'Ballon Or', category: 'ballon' },
+            status: 'sent',
+            notes: 'Devis envoyé le 17/03'
+          },
+          {
+            id: 'DEV-2025-003',
+            date: new Date(2025, 2, 17).toISOString(),
+            customerInfo: {
+              name: 'Mariam Ndiaye',
+              phone: '778889990',
+              email: 'mariam.ndiaye@email.com',
+              quantity: 20,
+              eventDate: new Date(2025, 5, 5).toISOString(),
+              budget: 200000,
+              message: 'Décoration complète pour mariage'
+            },
+            product: { id: 1, name: 'Nappe Blanche', category: 'table' },
+            status: 'converted',
+            notes: 'Convertie en facture FACT-2025-001'
+          }
+        ];
+        devis = demoDevis;
         localStorage.setItem(DEVIS_KEY, JSON.stringify(devis));
       }
     }
@@ -87,7 +137,13 @@
       if (stored) {
         products = JSON.parse(stored);
       } else {
-        
+        // Produits de démonstration
+        products = [
+          { id: 1, name: 'Nappe Blanche', category: 'table', priceHT: 5000, priceTTC: calculateTTC(5000), stock: 20, minStock: 5, status: 'active', image: 'https://images.unsplash.com/photo-1478146896981-b80fe463b330?w=200', location: 'A1-R1' },
+          { id: 2, name: 'Bougie LED', category: 'lumiere', priceHT: 2000, priceTTC: calculateTTC(2000), stock: 50, minStock: 10, status: 'active', image: 'https://images.unsplash.com/photo-1478146896981-b80fe463b330?w=200', location: 'B2-R3' },
+          { id: 3, name: 'Ballon Or', category: 'ballon', priceHT: 1500, priceTTC: calculateTTC(1500), stock: 100, minStock: 20, status: 'active', image: 'https://images.unsplash.com/photo-1478146896981-b80fe463b330?w=200', location: 'C1-R2' },
+          { id: 4, name: 'Chemins de table', category: 'deco', priceHT: 3000, priceTTC: calculateTTC(3000), stock: 3, minStock: 10, status: 'active', image: 'https://images.unsplash.com/photo-1478146896981-b80fe463b330?w=200', location: 'A2-R1' }
+        ];
         localStorage.setItem(PRODUCTS_KEY, JSON.stringify(products));
       }
     }
@@ -97,7 +153,51 @@
       if (stored) {
         invoices = JSON.parse(stored);
       } else {
-        invoices = [];
+        // Factures de démonstration
+        const today = new Date();
+        const lastMonth = new Date(today);
+        lastMonth.setMonth(lastMonth.getMonth() - 1);
+        
+        invoices = [
+          {
+            id: 'FACT-2025-001',
+            client: 'Mariam Ndiaye',
+            phone: '778889990',
+            email: 'mariam.ndiaye@email.com',
+            date: lastMonth.toISOString(),
+            dueDate: new Date(lastMonth.getTime() + 15*86400000).toISOString(),
+            items: [{
+              productId: 1,
+              name: 'Nappe Blanche',
+              quantity: 20,
+              priceHT: 5000
+            }],
+            totalHT: 100000,
+            tva: 18000,
+            totalTTC: 118000,
+            status: 'paid',
+            paymentMethod: 'wave'
+          },
+          {
+            id: 'FACT-2025-002',
+            client: 'Fatou Diop',
+            phone: '771234567',
+            email: 'fatou.diop@email.com',
+            date: today.toISOString(),
+            dueDate: new Date(today.getTime() + 15*86400000).toISOString(),
+            items: [{
+              productId: 3,
+              name: 'Ballon Or',
+              quantity: 10,
+              priceHT: 1500
+            }],
+            totalHT: 15000,
+            tva: 2700,
+            totalTTC: 17700,
+            status: 'unpaid',
+            paymentMethod: 'especes'
+          }
+        ];
         localStorage.setItem(INVOICES_KEY, JSON.stringify(invoices));
       }
     }
@@ -150,7 +250,12 @@
       if (stored) {
         employees = JSON.parse(stored);
       } else {
-        
+        // Employés de démonstration
+        employees = [
+          { id: 1, name: 'Mme Sarr', position: 'Directrice', baseSalary: 500000, defaultBonus: 50000, hireDate: '2020-01-15', phone: '771111111', email: 'sarr@njeeygu.sn', bankAccount: 'SN12345678', status: 'actif', notes: '', image: 'https://randomuser.me/api/portraits/women/1.jpg' },
+          { id: 2, name: 'M. Diallo', position: 'Chef de projet', baseSalary: 350000, defaultBonus: 25000, hireDate: '2021-03-10', phone: '772222222', email: 'diallo@njeeygu.sn', bankAccount: 'SN87654321', status: 'actif', notes: '', image: 'https://randomuser.me/api/portraits/men/1.jpg' },
+          { id: 3, name: 'Mme Fall', position: 'Décoratrice', baseSalary: 250000, defaultBonus: 15000, hireDate: '2022-06-20', phone: '773333333', email: 'fall@njeeygu.sn', bankAccount: 'SN11223344', status: 'actif', notes: '', image: 'https://randomuser.me/api/portraits/women/2.jpg' }
+        ];
         localStorage.setItem(EMPLOYEES_KEY, JSON.stringify(employees));
       }
     }
@@ -163,30 +268,42 @@
         const today = new Date();
         payments = [];
         
-        for (let i = 0; i < 3; i++) {
-          const month = today.getMonth() - i;
-          const year = today.getFullYear();
-          const paymentDate = new Date(year, month, 28);
+        employees.forEach(emp => {
+          // Paiement du mois en cours
+          const paymentDate = new Date(today.getFullYear(), today.getMonth(), 28);
           
-          employees.forEach(emp => {
-            const bonus = i === 0 ? emp.defaultBonus * 1.2 : emp.defaultBonus;
-            
-            payments.push({
-              id: payments.length + 1,
-              employeeId: emp.id,
-              employeeName: emp.name,
-              position: emp.position,
-              paymentDate: paymentDate.toISOString(),
-              period: `${paymentDate.toLocaleString('fr-FR', { month: 'long' })} ${year}`,
-              baseSalary: emp.baseSalary,
-              bonus: bonus,
-              total: emp.baseSalary + bonus,
-              status: 'payé',
-              paymentMethod: 'virement',
-              notes: ''
-            });
+          payments.push({
+            id: payments.length + 1,
+            employeeId: emp.id,
+            employeeName: emp.name,
+            position: emp.position,
+            paymentDate: paymentDate.toISOString(),
+            period: `${paymentDate.toLocaleString('fr-FR', { month: 'long' })} ${paymentDate.getFullYear()}`,
+            baseSalary: emp.baseSalary,
+            bonus: emp.defaultBonus,
+            total: emp.baseSalary + emp.defaultBonus,
+            status: 'payé',
+            paymentMethod: 'virement',
+            notes: ''
           });
-        }
+          
+          // Paiement du mois dernier
+          const lastMonthDate = new Date(today.getFullYear(), today.getMonth()-1, 28);
+          payments.push({
+            id: payments.length + 1,
+            employeeId: emp.id,
+            employeeName: emp.name,
+            position: emp.position,
+            paymentDate: lastMonthDate.toISOString(),
+            period: `${lastMonthDate.toLocaleString('fr-FR', { month: 'long' })} ${lastMonthDate.getFullYear()}`,
+            baseSalary: emp.baseSalary,
+            bonus: emp.defaultBonus,
+            total: emp.baseSalary + emp.defaultBonus,
+            status: 'payé',
+            paymentMethod: 'virement',
+            notes: ''
+          });
+        });
         
         localStorage.setItem(PAYMENTS_KEY, JSON.stringify(payments));
       }
@@ -197,7 +314,11 @@
       if (stored) {
         team = JSON.parse(stored);
       } else {
-        
+        team = [
+          { id: 1, name: 'Mme Sarr', position: 'Directrice', bio: 'Fondatrice de NJEEYGU', image: 'https://randomuser.me/api/portraits/women/1.jpg' },
+          { id: 2, name: 'M. Diallo', position: 'Chef de projet', bio: 'Coordination des événements', image: 'https://randomuser.me/api/portraits/men/1.jpg' },
+          { id: 3, name: 'Mme Fall', position: 'Décoratrice', bio: 'Spécialiste décoration', image: 'https://randomuser.me/api/portraits/women/2.jpg' }
+        ];
         localStorage.setItem(TEAM_KEY, JSON.stringify(team));
       }
     }
@@ -211,8 +332,34 @@
         const yesterday = new Date(today);
         yesterday.setDate(yesterday.getDate() - 1);
         
-        
-        
+        stockMovements = [
+          {
+            id: 1,
+            date: yesterday.toISOString(),
+            productId: 1,
+            productName: 'Nappe Blanche',
+            type: 'entree',
+            quantity: 10,
+            stockBefore: 10,
+            stockAfter: 20,
+            reason: 'reception',
+            comment: 'Réception fournisseur',
+            user: 'Admin'
+          },
+          {
+            id: 2,
+            date: today.toISOString(),
+            productId: 4,
+            productName: 'Chemins de table',
+            type: 'entree',
+            quantity: 5,
+            stockBefore: 0,
+            stockAfter: 5,
+            reason: 'reception',
+            comment: 'Nouvel arrivage',
+            user: 'Admin'
+          }
+        ];
         localStorage.setItem(STOCK_MOVEMENTS_KEY, JSON.stringify(stockMovements));
       }
     }
@@ -250,7 +397,7 @@
         
         const client = clientMap.get(key);
         client.devisCount = (client.devisCount || 0) + 1;
-        if (new Date(d.date) > new Date(client.lastActivity)) {
+        if (new Date(d.date) > new Date(client.lastActivity || 0)) {
           client.lastActivity = d.date;
         }
       });
@@ -274,7 +421,7 @@
         const client = clientMap.get(key);
         client.invoicesCount = (client.invoicesCount || 0) + 1;
         client.totalSpent = (client.totalSpent || 0) + inv.totalTTC;
-        if (new Date(inv.date) > new Date(client.lastActivity)) {
+        if (new Date(inv.date) > new Date(client.lastActivity || 0)) {
           client.lastActivity = inv.date;
         }
       });
@@ -347,7 +494,7 @@
       return `FACT-${year}-${String(count).padStart(3, '0')}`;
     }
 
-    function addInvoice(event) {
+    function addInvoiceFromModal(event) {
       event.preventDefault();
       
       const clientSelect = document.getElementById('invoiceClient');
@@ -361,7 +508,7 @@
       let totalHT = 0;
       let hasValidItems = false;
       
-      document.querySelectorAll('.invoice-item').forEach(item => {
+      document.querySelectorAll('#addInvoiceModalForm .invoice-item').forEach(item => {
         const productSelect = item.querySelector('select[name="productId"]');
         const quantity = parseInt(item.querySelector('input[name="quantity"]').value);
         
@@ -383,6 +530,15 @@
       if (!hasValidItems) {
         alert('Veuillez ajouter au moins un article valide');
         return;
+      }
+      
+      // Vérifier le stock
+      for (let item of items) {
+        const product = products.find(p => p.id === item.productId);
+        if (product.stock < item.quantity) {
+          alert(`Stock insuffisant pour ${product.name}. Disponible: ${product.stock}`);
+          return;
+        }
       }
       
       const tva = calculateTVA(totalHT);
@@ -428,7 +584,7 @@
       if (modal) modal.hide();
       
       // Réinitialiser le formulaire
-      document.getElementById('addInvoiceForm').reset();
+      document.getElementById('addInvoiceModalForm').reset();
       
       showNotification('Facture créée', `La facture ${newInvoice.id} a été créée avec succès`);
     }
@@ -466,7 +622,7 @@
     }
 
     function removeInvoiceItem(btn) {
-      const items = document.querySelectorAll('.invoice-item');
+      const items = document.querySelectorAll('#addInvoiceModalForm .invoice-item');
       if (items.length > 1) {
         btn.closest('.invoice-item').remove();
       } else {
@@ -521,7 +677,7 @@
         `;
       }).join('');
       
-      // Construire le contenu HTML de la facture OPTIMISÉ POUR MOBILE
+      // Construire le contenu HTML de la facture
       const invoiceHTML = `
         <div class="invoice-pdf-mobile">
           <div class="invoice-header-mobile">
@@ -677,25 +833,14 @@
       
       // Options optimisées pour mobile
       html2canvas(invoiceElement, {
-        scale: 3, // Haute résolution pour mobile
+        scale: 3,
         useCORS: true,
         logging: false,
         backgroundColor: '#ffffff',
         letterRendering: true,
         allowTaint: true,
         width: 800,
-        windowWidth: 800,
-        onclone: function(clonedDoc) {
-          const clonedElement = clonedDoc.getElementById('invoiceContent');
-          if (clonedElement) {
-            clonedElement.style.width = '800px';
-            clonedElement.style.maxWidth = '800px';
-            clonedElement.style.boxSizing = 'border-box';
-            clonedElement.style.fontSize = '12px';
-            clonedElement.style.lineHeight = '1.4';
-            clonedElement.style.fontFamily = 'Montserrat, sans-serif';
-          }
-        }
+        windowWidth: 800
       }).then(canvas => {
         // Restaurer les styles originaux
         invoiceElement.style.width = originalStyles.width;
@@ -716,7 +861,7 @@
         const pdfHeight = pdf.internal.pageSize.getHeight();
         
         // Calculer la hauteur de l'image pour qu'elle s'adapte à la page
-        const imgWidth = 190; // Largeur fixe pour mobile
+        const imgWidth = 190;
         const imgHeight = (canvas.height * imgWidth) / canvas.width;
         
         // Ajouter l'image au PDF
@@ -886,6 +1031,14 @@
         showNotification('Facture supprimée', 'La facture a été supprimée avec succès');
       }
     }
+    
+    function deleteAllInvoices() {
+      if (confirm('Êtes-vous sûr de vouloir supprimer TOUTES les factures ? Cette action est irréversible.')) {
+        invoices = [];
+        saveInvoices();
+        showNotification('Toutes les factures', 'Toutes les factures ont été supprimées');
+      }
+    }
 
     function filterInvoices(filter, event) {
       document.querySelectorAll('#section-factures .admin-tab').forEach(t => t.classList.remove('active'));
@@ -928,17 +1081,19 @@
         tbody.appendChild(row);
       });
       
-      if ($.fn.DataTable.isDataTable('#invoicesTable')) {
+      if ($.fn.DataTable && $.fn.DataTable.isDataTable('#invoicesTable')) {
         $('#invoicesTable').DataTable().destroy();
       }
       
-      $('#invoicesTable').DataTable({
-        pageLength: 10,
-        order: [[7, 'desc']],
-        language: {
-          url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json'
-        }
-      });
+      if ($.fn.DataTable) {
+        $('#invoicesTable').DataTable({
+          pageLength: 10,
+          order: [[7, 'desc']],
+          language: {
+            url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json'
+          }
+        });
+      }
     }
 
     function showAddInvoiceModal() {
@@ -951,7 +1106,7 @@
       });
       
       // Remplir la liste des produits pour le premier article
-      const firstProductSelect = document.querySelector('.invoice-item select[name="productId"]');
+      const firstProductSelect = document.querySelector('#addInvoiceModalForm .invoice-item select[name="productId"]');
       if (firstProductSelect) {
         let productOptions = '<option value="">Sélectionnez un produit</option>';
         products.forEach(p => {
@@ -1037,17 +1192,19 @@
         tbody.appendChild(row);
       });
       
-      if ($.fn.DataTable.isDataTable('#invoicesTable')) {
+      if ($.fn.DataTable && $.fn.DataTable.isDataTable('#invoicesTable')) {
         $('#invoicesTable').DataTable().destroy();
       }
       
-      $('#invoicesTable').DataTable({
-        pageLength: 10,
-        order: [[7, 'desc']],
-        language: {
-          url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json'
-        }
-      });
+      if ($.fn.DataTable) {
+        $('#invoicesTable').DataTable({
+          pageLength: 10,
+          order: [[7, 'desc']],
+          language: {
+            url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json'
+          }
+        });
+      }
       
       updateInvoiceStats();
     }
@@ -1078,18 +1235,20 @@
         tbody.appendChild(row);
       });
       
-      if ($.fn.DataTable.isDataTable('#recentInvoicesTable')) {
+      if ($.fn.DataTable && $.fn.DataTable.isDataTable('#recentInvoicesTable')) {
         $('#recentInvoicesTable').DataTable().destroy();
       }
       
-      $('#recentInvoicesTable').DataTable({
-        pageLength: 5,
-        order: [[3, 'desc']],
-        searching: false,
-        language: {
-          url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json'
-        }
-      });
+      if ($.fn.DataTable) {
+        $('#recentInvoicesTable').DataTable({
+          pageLength: 5,
+          order: [[3, 'desc']],
+          searching: false,
+          language: {
+            url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json'
+          }
+        });
+      }
     }
 
     function generateInvoiceReport() {
@@ -1114,18 +1273,6 @@
         - TVA 18%: ${Math.round(totalTVA).toLocaleString('fr-FR')} FCFA
         - Total TTC: ${Math.round(totalTTC).toLocaleString('fr-FR')} FCFA
       `);
-    }
-
-    function createDemoInvoices() {
-      if (invoices.length === 0) {
-        const today = new Date();
-        const lastMonth = new Date(today);
-        lastMonth.setMonth(lastMonth.getMonth() - 1);
-        
-        
-        invoices.push(...demoInvoices);
-        localStorage.setItem(INVOICES_KEY, JSON.stringify(invoices));
-      }
     }
     
     // ==================== FONCTIONS POUR LES DEVIS ====================
@@ -1172,17 +1319,19 @@
         tbody.appendChild(row);
       });
       
-      if ($.fn.DataTable.isDataTable('#devisTable')) {
+      if ($.fn.DataTable && $.fn.DataTable.isDataTable('#devisTable')) {
         $('#devisTable').DataTable().destroy();
       }
       
-      $('#devisTable').DataTable({
-        pageLength: 10,
-        order: [[1, 'desc']],
-        language: {
-          url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json'
-        }
-      });
+      if ($.fn.DataTable) {
+        $('#devisTable').DataTable({
+          pageLength: 10,
+          order: [[1, 'desc']],
+          language: {
+            url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json'
+          }
+        });
+      }
       
       updateRecentDevisTable();
     }
@@ -1214,18 +1363,20 @@
         tbody.appendChild(row);
       });
       
-      if ($.fn.DataTable.isDataTable('#recentDevisTable')) {
+      if ($.fn.DataTable && $.fn.DataTable.isDataTable('#recentDevisTable')) {
         $('#recentDevisTable').DataTable().destroy();
       }
       
-      $('#recentDevisTable').DataTable({
-        pageLength: 5,
-        order: [[4, 'desc']],
-        searching: false,
-        language: {
-          url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json'
-        }
-      });
+      if ($.fn.DataTable) {
+        $('#recentDevisTable').DataTable({
+          pageLength: 5,
+          order: [[4, 'desc']],
+          searching: false,
+          language: {
+            url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json'
+          }
+        });
+      }
     }
     
     function updateDevisStats() {
@@ -1365,17 +1516,19 @@
         tbody.appendChild(row);
       });
       
-      if ($.fn.DataTable.isDataTable('#devisTable')) {
+      if ($.fn.DataTable && $.fn.DataTable.isDataTable('#devisTable')) {
         $('#devisTable').DataTable().destroy();
       }
       
-      $('#devisTable').DataTable({
-        pageLength: 10,
-        order: [[1, 'desc']],
-        language: {
-          url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json'
-        }
-      });
+      if ($.fn.DataTable) {
+        $('#devisTable').DataTable({
+          pageLength: 10,
+          order: [[1, 'desc']],
+          language: {
+            url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json'
+          }
+        });
+      }
     }
     
     function contactDevisClient(devisId) {
@@ -1459,6 +1612,12 @@
       }
       
       const quantity = parseInt(devisItem.customerInfo.quantity) || 1;
+      
+      if (product.stock < quantity) {
+        alert(`Stock insuffisant pour ${product.name}. Disponible: ${product.stock}`);
+        return;
+      }
+      
       const totalHT = product.priceHT * quantity;
       const tva = calculateTVA(totalHT);
       const totalTTC = calculateTTC(totalHT);
@@ -1638,7 +1797,7 @@ ${topProducts || 'Aucune donnée'}
       const defaultImage = 'https://images.unsplash.com/photo-1478146896981-b80fe463b330?w=200';
       
       const newProduct = {
-        id: products.length + 1,
+        id: products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 1,
         name: productName,
         category: category,
         priceHT: priceHT,
@@ -1761,6 +1920,16 @@ ${topProducts || 'Aucune donnée'}
         updateProductsTable();
         updateStockTable();
         showNotification('Produit supprimé', `${product.name} a été supprimé avec succès`);
+      }
+    }
+    
+    function deleteAllProducts() {
+      if (confirm('Êtes-vous sûr de vouloir supprimer TOUS les produits ? Cette action est irréversible.')) {
+        products = [];
+        localStorage.setItem(PRODUCTS_KEY, JSON.stringify(products));
+        updateProductsTable();
+        updateStockTable();
+        showNotification('Tous les produits', 'Tous les produits ont été supprimés');
       }
     }
     
@@ -2020,16 +2189,18 @@ ${topProducts || 'Aucune donnée'}
         tbody.appendChild(row);
       });
       
-      if ($.fn.DataTable.isDataTable('#productsTable')) {
+      if ($.fn.DataTable && $.fn.DataTable.isDataTable('#productsTable')) {
         $('#productsTable').DataTable().destroy();
       }
       
-      $('#productsTable').DataTable({
-        pageLength: 10,
-        language: {
-          url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json'
-        }
-      });
+      if ($.fn.DataTable) {
+        $('#productsTable').DataTable({
+          pageLength: 10,
+          language: {
+            url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json'
+          }
+        });
+      }
     }
     
     function updateStockTable(filter = 'all') {
@@ -2082,17 +2253,19 @@ ${topProducts || 'Aucune donnée'}
         tbody.appendChild(row);
       });
       
-      if ($.fn.DataTable.isDataTable('#stockTable')) {
+      if ($.fn.DataTable && $.fn.DataTable.isDataTable('#stockTable')) {
         $('#stockTable').DataTable().destroy();
       }
       
-      $('#stockTable').DataTable({
-        pageLength: 10,
-        order: [[5, 'asc']],
-        language: {
-          url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json'
-        }
-      });
+      if ($.fn.DataTable) {
+        $('#stockTable').DataTable({
+          pageLength: 10,
+          order: [[5, 'asc']],
+          language: {
+            url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json'
+          }
+        });
+      }
       
       updateStockStats();
     }
@@ -2120,18 +2293,20 @@ ${topProducts || 'Aucune donnée'}
         tbody.appendChild(row);
       });
       
-      if ($.fn.DataTable.isDataTable('#stockMovementsTable')) {
+      if ($.fn.DataTable && $.fn.DataTable.isDataTable('#stockMovementsTable')) {
         $('#stockMovementsTable').DataTable().destroy();
       }
       
-      $('#stockMovementsTable').DataTable({
-        pageLength: 5,
-        order: [[0, 'desc']],
-        searching: false,
-        language: {
-          url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json'
-        }
-      });
+      if ($.fn.DataTable) {
+        $('#stockMovementsTable').DataTable({
+          pageLength: 5,
+          order: [[0, 'desc']],
+          searching: false,
+          language: {
+            url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json'
+          }
+        });
+      }
     }
     
     function updateClientsTable() {
@@ -2155,7 +2330,7 @@ ${topProducts || 'Aucune donnée'}
           <td>${client.devisCount || 0}</td>
           <td>${client.invoicesCount || 0}</td>
           <td>${client.totalSpent ? client.totalSpent.toLocaleString('fr-FR') : 0} FCFA</td>
-          <td>${formatDate(client.lastActivity)}</td>
+          <td>${client.lastActivity ? formatDate(client.lastActivity) : '-'}</td>
           <td>
             <button class="action-btn" onclick="contactClient('${client.phone}')"><i class="fab fa-whatsapp"></i></button>
             <button class="action-btn invoice" onclick="createInvoiceForClient('${client.phone}')"><i class="fas fa-file-invoice-dollar"></i></button>
@@ -2165,16 +2340,18 @@ ${topProducts || 'Aucune donnée'}
         tbody.appendChild(row);
       });
       
-      if ($.fn.DataTable.isDataTable('#clientsTable')) {
+      if ($.fn.DataTable && $.fn.DataTable.isDataTable('#clientsTable')) {
         $('#clientsTable').DataTable().destroy();
       }
       
-      $('#clientsTable').DataTable({
-        pageLength: 10,
-        language: {
-          url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json'
-        }
-      });
+      if ($.fn.DataTable) {
+        $('#clientsTable').DataTable({
+          pageLength: 10,
+          language: {
+            url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json'
+          }
+        });
+      }
     }
     
     function updateCategoriesTable() {
@@ -2206,17 +2383,19 @@ ${topProducts || 'Aucune donnée'}
         tbody.appendChild(row);
       });
       
-      if ($.fn.DataTable.isDataTable('#categoriesTable')) {
+      if ($.fn.DataTable && $.fn.DataTable.isDataTable('#categoriesTable')) {
         $('#categoriesTable').DataTable().destroy();
       }
       
-      $('#categoriesTable').DataTable({
-        pageLength: 10,
-        searching: false,
-        language: {
-          url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json'
-        }
-      });
+      if ($.fn.DataTable) {
+        $('#categoriesTable').DataTable({
+          pageLength: 10,
+          searching: false,
+          language: {
+            url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json'
+          }
+        });
+      }
     }
     
     function updateServicesTable() {
@@ -2240,16 +2419,18 @@ ${topProducts || 'Aucune donnée'}
         tbody.appendChild(row);
       });
       
-      if ($.fn.DataTable.isDataTable('#servicesTable')) {
+      if ($.fn.DataTable && $.fn.DataTable.isDataTable('#servicesTable')) {
         $('#servicesTable').DataTable().destroy();
       }
       
-      $('#servicesTable').DataTable({
-        pageLength: 10,
-        language: {
-          url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json'
-        }
-      });
+      if ($.fn.DataTable) {
+        $('#servicesTable').DataTable({
+          pageLength: 10,
+          language: {
+            url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json'
+          }
+        });
+      }
     }
     
     // ==================== FONCTIONS POUR LES CLIENTS ====================
@@ -2307,6 +2488,15 @@ ${topProducts || 'Aucune donnée'}
       }
     }
     
+    function deleteAllClients() {
+      if (confirm('Êtes-vous sûr de vouloir supprimer TOUS les clients ? Cette action est irréversible.')) {
+        clients = [];
+        localStorage.setItem(CLIENTS_KEY, JSON.stringify(clients));
+        updateClientsTable();
+        showNotification('Tous les clients', 'Tous les clients ont été supprimés');
+      }
+    }
+    
     function contactClient(phone) {
       const phoneNumber = phone.replace(/\s/g, '');
       const message = 'Bonjour, je vous contacte de la part de NJEEYGU.';
@@ -2334,7 +2524,7 @@ ${topProducts || 'Aucune donnée'}
         'Demandes devis': c.devisCount || 0,
         'Factures': c.invoicesCount || 0,
         'Total dépensé': c.totalSpent || 0,
-        'Dernière activité': formatDate(c.lastActivity)
+        'Dernière activité': c.lastActivity ? formatDate(c.lastActivity) : ''
       }));
       
       const csv = convertToCSV(data);
@@ -2356,7 +2546,7 @@ ${topProducts || 'Aucune donnée'}
       const priceTTC = calculateTTC(priceHT);
       
       const newService = {
-        id: services.length + 1,
+        id: services.length > 0 ? Math.max(...services.map(s => s.id)) + 1 : 1,
         name: document.getElementById('serviceName').value,
         description: document.getElementById('serviceDescription').value,
         priceHT: priceHT,
@@ -2374,7 +2564,17 @@ ${topProducts || 'Aucune donnée'}
     }
     
     function editService(serviceId) {
-      alert(`Édition du service ${serviceId} - Fonctionnalité à implémenter`);
+      const service = services.find(s => s.id === serviceId);
+      if (!service) return;
+      
+      const newPrice = prompt(`Nouveau prix HT pour ${service.name}:`, service.priceHT);
+      if (newPrice && !isNaN(newPrice) && parseInt(newPrice) > 0) {
+        service.priceHT = parseInt(newPrice);
+        service.priceTTC = calculateTTC(service.priceHT);
+        localStorage.setItem(SERVICES_KEY, JSON.stringify(services));
+        updateServicesTable();
+        showNotification('Service modifié', `Le prix de ${service.name} a été mis à jour`);
+      }
     }
     
     function deleteService(serviceId) {
@@ -2456,7 +2656,7 @@ ${topProducts || 'Aucune donnée'}
       const photo = document.getElementById('memberPhoto').value || 'https://randomuser.me/api/portraits/lego/1.jpg';
       
       const newMember = {
-        id: team.length + 1,
+        id: team.length > 0 ? Math.max(...team.map(m => m.id)) + 1 : 1,
         name: name,
         position: position,
         bio: bio,
@@ -2480,7 +2680,18 @@ ${topProducts || 'Aucune donnée'}
     }
     
     function editTeamMember(memberId) {
-      alert('Fonctionnalité d\'édition à implémenter');
+      const member = team.find(m => m.id === memberId);
+      if (!member) return;
+      
+      const newName = prompt('Nouveau nom:', member.name);
+      if (newName) member.name = newName;
+      
+      const newPosition = prompt('Nouveau poste:', member.position);
+      if (newPosition) member.position = newPosition;
+      
+      localStorage.setItem(TEAM_KEY, JSON.stringify(team));
+      initTeamUI();
+      showNotification('Membre modifié', `Les informations de ${member.name} ont été mises à jour`);
     }
     
     // ==================== FONCTIONS POUR LES SALAIRES ====================
@@ -2546,16 +2757,18 @@ ${topProducts || 'Aucune donnée'}
         tbody.appendChild(row);
       });
       
-      if ($.fn.DataTable.isDataTable('#salariesTable')) {
+      if ($.fn.DataTable && $.fn.DataTable.isDataTable('#salariesTable')) {
         $('#salariesTable').DataTable().destroy();
       }
       
-      $('#salariesTable').DataTable({
-        pageLength: 10,
-        language: {
-          url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json'
-        }
-      });
+      if ($.fn.DataTable) {
+        $('#salariesTable').DataTable({
+          pageLength: 10,
+          language: {
+            url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json'
+          }
+        });
+      }
     }
     
     function updatePaymentsTable() {
@@ -2577,22 +2790,25 @@ ${topProducts || 'Aucune donnée'}
           <td>
             <button class="action-btn" onclick="viewPayment(${payment.id})"><i class="fas fa-eye"></i></button>
             <button class="action-btn pdf" onclick="generatePayslipForPayment(${payment.id})"><i class="fas fa-download"></i></button>
+            <button class="action-btn delete" onclick="deletePayment(${payment.id})" title="Supprimer"><i class="fas fa-trash"></i></button>
           </td>
         `;
         tbody.appendChild(row);
       });
       
-      if ($.fn.DataTable.isDataTable('#paymentsTable')) {
+      if ($.fn.DataTable && $.fn.DataTable.isDataTable('#paymentsTable')) {
         $('#paymentsTable').DataTable().destroy();
       }
       
-      $('#paymentsTable').DataTable({
-        pageLength: 10,
-        order: [[0, 'desc']],
-        language: {
-          url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json'
-        }
-      });
+      if ($.fn.DataTable) {
+        $('#paymentsTable').DataTable({
+          pageLength: 10,
+          order: [[0, 'desc']],
+          language: {
+            url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json'
+          }
+        });
+      }
     }
     
     function updatePayslipsTable() {
@@ -2612,6 +2828,7 @@ ${topProducts || 'Aucune donnée'}
           <td>
             <button class="action-btn" onclick="viewPayslip(${payment.id})"><i class="fas fa-eye"></i></button>
             <button class="action-btn pdf" onclick="generatePayslipForPayment(${payment.id})"><i class="fas fa-download"></i></button>
+            <button class="action-btn delete" onclick="deletePayslip(${payment.id})" title="Supprimer"><i class="fas fa-trash"></i></button>
           </td>
         `;
         tbody.appendChild(row);
@@ -2635,7 +2852,7 @@ ${topProducts || 'Aucune donnée'}
     
     function initSalariesCharts() {
       const ctx1 = document.getElementById('salariesChart')?.getContext('2d');
-      if (ctx1) {
+      if (ctx1 && typeof Chart !== 'undefined') {
         if (window.salariesChart) window.salariesChart.destroy();
         
         const activeEmployees = employees.filter(e => e.status === 'actif');
@@ -2676,7 +2893,7 @@ ${topProducts || 'Aucune donnée'}
       }
       
       const ctx2 = document.getElementById('payrollEvolutionChart')?.getContext('2d');
-      if (ctx2) {
+      if (ctx2 && typeof Chart !== 'undefined') {
         if (window.payrollChart) window.payrollChart.destroy();
         
         const monthlyTotals = {};
@@ -2733,7 +2950,7 @@ ${topProducts || 'Aucune donnée'}
       const hireDate = document.getElementById('employeeHireDate').value;
       
       const newEmployee = {
-        id: employees.length + 1,
+        id: employees.length > 0 ? Math.max(...employees.map(e => e.id)) + 1 : 1,
         name: document.getElementById('employeeName').value,
         position: document.getElementById('employeePosition').value,
         baseSalary: parseInt(document.getElementById('employeeBaseSalary').value),
@@ -2789,7 +3006,7 @@ ${topProducts || 'Aucune donnée'}
       
       const bonus = prompt(`Prime pour ${employee.name} (FCFA):`, employee.defaultBonus || 0);
       const payment = {
-        id: payments.length + 1,
+        id: payments.length > 0 ? Math.max(...payments.map(p => p.id)) + 1 : 1,
         employeeId: employee.id,
         employeeName: employee.name,
         position: employee.position,
@@ -2822,6 +3039,41 @@ ${topProducts || 'Aucune donnée'}
       }
     }
     
+    function deleteAllEmployees() {
+      if (confirm('Êtes-vous sûr de vouloir supprimer TOUS les employés ? Cette action est irréversible.')) {
+        employees = [];
+        localStorage.setItem(EMPLOYEES_KEY, JSON.stringify(employees));
+        updateSalariesUI();
+        showNotification('Tous les employés', 'Tous les employés ont été supprimés');
+      }
+    }
+    
+    function deletePayment(paymentId) {
+      if (confirm('Êtes-vous sûr de vouloir supprimer ce paiement ?')) {
+        payments = payments.filter(p => p.id !== paymentId);
+        localStorage.setItem(PAYMENTS_KEY, JSON.stringify(payments));
+        updateSalariesUI();
+        showNotification('Paiement supprimé', 'Le paiement a été supprimé avec succès');
+      }
+    }
+    
+    function deleteAllPayments() {
+      if (confirm('Êtes-vous sûr de vouloir supprimer TOUS les paiements ? Cette action est irréversible.')) {
+        payments = [];
+        localStorage.setItem(PAYMENTS_KEY, JSON.stringify(payments));
+        updateSalariesUI();
+        showNotification('Tous les paiements', 'Tous les paiements ont été supprimés');
+      }
+    }
+    
+    function deletePayslip(paymentId) {
+      deletePayment(paymentId);
+    }
+    
+    function deleteAllPayslips() {
+      deleteAllPayments();
+    }
+    
     function generatePayroll() {
       const now = new Date();
       const activeEmployees = employees.filter(e => e.status === 'actif');
@@ -2836,7 +3088,7 @@ ${topProducts || 'Aucune donnée'}
         
         if (!alreadyPaid) {
           const payment = {
-            id: payments.length + 1,
+            id: payments.length > 0 ? Math.max(...payments.map(p => p.id)) + 1 : 1,
             employeeId: employee.id,
             employeeName: employee.name,
             position: employee.position,
@@ -2860,7 +3112,7 @@ ${topProducts || 'Aucune donnée'}
       showNotification('Paie générée', `${count} employé(s) ont été payés`);
     }
     
-    // ==================== FONCTION DE GÉNÉRATION DE BULLETIN DE SALAIRE (même style que la facture) ====================
+    // ==================== FONCTION DE GÉNÉRATION DE BULLETIN DE SALAIRE ====================
     
     function generatePayslip(employeeId) {
       const employee = employees.find(e => e.id === employeeId);
@@ -3066,18 +3318,7 @@ ${topProducts || 'Aucune donnée'}
         letterRendering: true,
         allowTaint: true,
         width: 800,
-        windowWidth: 800,
-        onclone: function(clonedDoc) {
-          const clonedElement = clonedDoc.getElementById('payslipContent');
-          if (clonedElement) {
-            clonedElement.style.width = '800px';
-            clonedElement.style.maxWidth = '800px';
-            clonedElement.style.boxSizing = 'border-box';
-            clonedElement.style.fontSize = '12px';
-            clonedElement.style.lineHeight = '1.4';
-            clonedElement.style.fontFamily = 'Montserrat, sans-serif';
-          }
-        }
+        windowWidth: 800
       }).then(canvas => {
         // Restaurer les styles originaux
         payslipElement.style.width = originalStyles.width;
@@ -3347,7 +3588,7 @@ ${topProducts || 'Aucune donnée'}
       const priceTTC = calculateTTC(priceHT);
       
       const newProduct = {
-        id: products.length + 1,
+        id: products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 1,
         name: document.getElementById('productName').value,
         category: document.getElementById('productCategory').value,
         priceHT: priceHT,
@@ -3376,6 +3617,7 @@ ${topProducts || 'Aucune donnée'}
       showNotification('Produit ajouté', `${newProduct.name} a été ajouté avec succès (TVA 18% incluse)`);
       
       document.getElementById('addProductForm').reset();
+      document.getElementById('productPriceTTC').value = '';
     }
     
     function editProduct(productId) {
@@ -3606,7 +3848,6 @@ ${topProducts || 'Aucune donnée'}
         initPayments();
         initTeam();
         initStockMovements();
-        createDemoInvoices();
         
         updateStats();
         updateDevisTables();
