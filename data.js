@@ -3865,7 +3865,7 @@ ${topProducts || 'Aucune donnée'}
         
         updateStockAlerts();
       } else {
-        alert('Identifiants incorrects. Utilisez admin / admin123');
+        alert('Identifiants incorrects.'); //Utilisez admin / admin123
       }
     });
     
