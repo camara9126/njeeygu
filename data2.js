@@ -3578,7 +3578,7 @@ document.getElementById('loginForm').addEventListener('submit', function(event) 
         refreshAllUI();
         updateStockAlerts();
     } else {
-        alert('Identifiants incorrects. Utilisez admin / admin123');
+        alert('Identifiants incorrects.'); //  Utilisez admin / admin123
     }
 });
 
